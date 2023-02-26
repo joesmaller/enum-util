@@ -6,6 +6,7 @@
 local TOSTRING_ENUM = "Enum.%s"
 local TOSTRING_ENUMITEM = "Enum.%s.%s"
 local ERROR_INVALID_TYPE = "invalid argument #%s to '%s' (%s expected, got %s)"
+local ERROR_INVALD_INDEX = "%q is a restricted CustomEnumItem index"
 
 local EnumUtil = {}
 
@@ -27,6 +28,13 @@ function EnumUtil.createEnumItem(enumType: string, enumItemName: string, dataTab
 	assertFunctionType("createEnumItem", 1, "string", enumType)
 	assertFunctionType("createEnumItem", 2, "string", enumItemName)
 	assertFunctionType("createEnumItem", 3, "table", if type(dataTable) == "nil" then {} else dataTable)
+
+	if dataTable then
+		for index in dataTable do
+			assert(index ~= "Name", ERROR_INVALD_INDEX:format(index))
+			assert(index ~= "EnumType", ERROR_INVALD_INDEX:format(index))
+		end
+	end
 
 	local newEnumItem: {[any]: any} = if dataTable then table.clone(dataTable) else {}
 
