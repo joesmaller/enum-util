@@ -10,8 +10,10 @@ local ERROR_INVALID_TYPE = "invalid argument #%s to '%s' (%s expected, got %s)"
 local ERROR_INVALD_INDEX = "%q is a restricted CustomEnumItem index"
 local ERROR_INVALID_ENUMITEM_NAME = "%q is not a valid CustomEnumItem name for CustomEnum %q"
 local ERROR_DUPLICATE_ENUMITEM = "%q is a duplicate CustomEnumItem within %q"
+local ERROR_EXISTING_ENUM = "CustomEnum %q already exists, unable to create"
 
 local EnumUtil = {}
+local _enums: {[string]: CustomEnum} = {}
 
 local function assertFunctionType(functionName: string, argument: number, desiredType: string, parameter: any)
 	assert(typeof(parameter) == desiredType,
@@ -69,6 +71,7 @@ end
 function EnumUtil.createEnum(enumName: string, enumItems: {CustomEnumItem}): CustomEnum
 	assertFunctionType("createEnum", 1, "string", enumName)
 	assertFunctionType("createEnum", 2, "table", enumItems)
+	assert(not _enums[enumName], ERROR_EXISTING_ENUM:format(enumName))
 
 	local newEnum = {}
 
@@ -87,7 +90,7 @@ function EnumUtil.createEnum(enumName: string, enumItems: {CustomEnumItem}): Cus
 		return table.clone(enumItems)
 	end
 
-	return table.freeze(setmetatable(newEnum, {
+	local result = table.freeze(setmetatable(newEnum, {
 		__EnumProxy = newproxy();
 		__eq = function(self, other)
 			if type(other) ~= "table" then return false end
@@ -100,6 +103,10 @@ function EnumUtil.createEnum(enumName: string, enumItems: {CustomEnumItem}): Cus
 			return TOSTRING_ENUM:format(enumName)
 		end;
 	}))
+
+	_enums[enumName] = result
+
+	return result
 end
 
 --[=[
