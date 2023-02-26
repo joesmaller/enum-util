@@ -90,7 +90,7 @@ function EnumUtil.createEnum(enumName: string, enumItems: {CustomEnumItem}): Cus
 		return table.clone(enumItems)
 	end
 
-	local result = table.freeze(setmetatable(newEnum, {
+	local result = table.freeze(setmetatable(newEnum :: typeof(newEnum) & {[string]: CustomEnumItem}, {
 		__EnumProxy = newproxy();
 		__eq = function(self, other)
 			if type(other) ~= "table" then return false end
@@ -131,6 +131,27 @@ function EnumUtil.createEnumFromDictionary(enumName: string, rawEnumItems: {[str
 	return EnumUtil.createEnum(enumName, enumItems)
 end
 
+--[=[
+	@within Enum-Util
+	@prop Enum CustomEnum
+
+	This is used to retrieve the CustomEnums.
+	For example, if we added a truck enumItem to a vehicle enum we could do;
+	```lua
+	local EnumUtil = require('PATH_TO_MODULE')
+	local CustomEnum = EnumUtil.Enum
+
+	local truck = CustomEnum.Vehicle.Truck
+	```
+]=]
+local enumIndexer = {}
+function enumIndexer:GetEnums()
+	return table.clone(_enums) :: {[string]: CustomEnum}
+end
+local enum = table.freeze(setmetatable({enumIndexer} :: typeof(enumIndexer), {
+	__index = _enums;
+}))
+EnumUtil.Enum = enum :: typeof(enum) & {[string]: CustomEnum}
 
 --[=[
 	@interface CustomEnumItem
