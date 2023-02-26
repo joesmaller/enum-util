@@ -3,8 +3,10 @@
 	@class Enum-Util
 ]=]
 
+local TOSTRING_ENUM = "Enum.%s"
 local TOSTRING_ENUMITEM = "Enum.%s.%s"
 local ERROR_INVALID_TYPE = "invalid argument #%s to '%s' (%s expected, got %s)"
+local ERROR_INVALD_ENUM_NAME = "Name is a restricted CustonEnum name"
 
 local EnumUtil = {}
 
@@ -47,6 +49,49 @@ function EnumUtil.createEnumItem(enumType: string, enumItemName: string, dataTab
 	}))
 end
 
+--[=[
+	@param enumName string
+	@param enumItems {CustomEnumItem}
+	@return CustomEnum
+
+	Creates a new CustomEnum from an array of CustomEnumItems
+]=]
+function EnumUtil.createEnum(enumName: string, enumItems: {CustomEnumItem}): CustomEnum
+	assertFunctionType("createEnum", 1, "string", enumName)
+	assertFunctionType("createEnum", 2, "table", enumItems)
+	assert(enumName ~= "Name", ERROR_INVALD_ENUM_NAME)
+
+	local newEnum = {}
+
+	newEnum.Name = enumName
+
+	-- add the enum items to the enum
+	for _,enumItem in enumItems do
+		if enumItem.EnumType ~= enumName then
+			error(ERROR_INVALID_TYPE:format(enumName, enumItem.Name, enumItem.EnumType))
+		end
+		newEnum[enumItem.Name] = enumItem
+	end
+
+	function newEnum:GetEnumItems()
+		return table.clone(enumItems)
+	end
+
+	return table.freeze(setmetatable(newEnum, {
+		__EnumProxy = newproxy();
+		__eq = function(self, other)
+			if type(other) ~= "table" then return false end
+			local selfMetatable = getmetatable(self)
+			local otherMetatable = getmetatable(other)
+			if otherMetatable and (selfMetatable.__EnumProxy == otherMetatable.__EnumProxy) then return true end
+			return false
+		end;
+		__tostring = function()
+			return TOSTRING_ENUM:format(enumName)
+		end;
+	}))
+end
+
 
 --[=[
 	@interface CustomEnumItem
@@ -54,6 +99,14 @@ end
 	.EnumType string
 ]=]
 type CustomEnumItem = typeof(EnumUtil.createEnumItem("", ""))
+
+--[=[
+	@interface CustomEnum
+	.Name string
+	.GetEnumItems () -> ({CustomEnumItem})
+	[string] CustomEnumItem
+]=]
+type CustomEnum = typeof(EnumUtil.createEnum("", {}))
 
 
 return table.freeze(EnumUtil)
