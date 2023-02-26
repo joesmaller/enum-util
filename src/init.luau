@@ -6,7 +6,6 @@
 local TOSTRING_ENUM = "Enum.%s"
 local TOSTRING_ENUMITEM = "Enum.%s.%s"
 local ERROR_INVALID_TYPE = "invalid argument #%s to '%s' (%s expected, got %s)"
-local ERROR_INVALD_ENUM_NAME = "Name is a restricted CustonEnum name"
 
 local EnumUtil = {}
 
@@ -59,7 +58,6 @@ end
 function EnumUtil.createEnum(enumName: string, enumItems: {CustomEnumItem}): CustomEnum
 	assertFunctionType("createEnum", 1, "string", enumName)
 	assertFunctionType("createEnum", 2, "table", enumItems)
-	assert(enumName ~= "Name", ERROR_INVALD_ENUM_NAME)
 
 	local newEnum = {}
 
