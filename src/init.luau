@@ -102,6 +102,28 @@ function EnumUtil.createEnum(enumName: string, enumItems: {CustomEnumItem}): Cus
 	}))
 end
 
+--[=[
+	@param enumName string
+	@param rawEnumItems {[string]: {[any]: any}}
+	@return CustomEnum
+
+	Returns a new CustomEnum from a dictionary of tables, where the index in
+	the dictionary corresponds with the enum item name.
+]=]
+function EnumUtil.createEnumFromDictionary(enumName: string, rawEnumItems: {[string]: {[any]: any}}): CustomEnum
+	assertFunctionType("createEnum", 1, "string", enumName)
+	assertFunctionType("createEnum", 2, "table", rawEnumItems)
+
+	local enumItems: {CustomEnumItem} = {}
+
+	for enumItemName, dataTable in rawEnumItems do
+		local newEnumItem = EnumUtil.createEnumItem(enumName, enumItemName, dataTable)
+		table.insert(enumItems, newEnumItem)
+	end
+
+	return EnumUtil.createEnum(enumName, enumItems)
+end
+
 
 --[=[
 	@interface CustomEnumItem
