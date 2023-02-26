@@ -5,8 +5,11 @@
 
 local TOSTRING_ENUM = "Enum.%s"
 local TOSTRING_ENUMITEM = "Enum.%s.%s"
+local ERROR_INCORRECT_ENUMTYPE = "Expected %q for CustomEnumItem %q.EnumType, got %q"
 local ERROR_INVALID_TYPE = "invalid argument #%s to '%s' (%s expected, got %s)"
 local ERROR_INVALD_INDEX = "%q is a restricted CustomEnumItem index"
+local ERROR_INVALID_ENUMITEM_NAME = "%q is not a valid CustomEnumItem name for CustomEnum %q"
+local ERROR_DUPLICATE_ENUMITEM = "%q is a duplicate CustomEnumItem within %q"
 
 local EnumUtil = {}
 
@@ -73,9 +76,10 @@ function EnumUtil.createEnum(enumName: string, enumItems: {CustomEnumItem}): Cus
 
 	-- add the enum items to the enum
 	for _,enumItem in enumItems do
-		if enumItem.EnumType ~= enumName then
-			error(ERROR_INVALID_TYPE:format(enumName, enumItem.Name, enumItem.EnumType))
-		end
+		assert(not (enumItem.Name == "Name"), ERROR_INVALID_ENUMITEM_NAME:format(enumItem.Name, enumName))
+		assert(not (enumItem.Name == "GetEnumItems"), ERROR_INVALID_ENUMITEM_NAME:format(enumItem.Name, enumName))
+		assert(not newEnum[enumItem.Name], ERROR_DUPLICATE_ENUMITEM:format(enumItem.Name, enumName))
+		assert(enumItem.EnumType == enumName, ERROR_INCORRECT_ENUMTYPE:format(enumName, enumItem.Name, enumItem.EnumType))
 		newEnum[enumItem.Name] = enumItem
 	end
 
