@@ -146,9 +146,9 @@ end
 ]=]
 local enumIndexer = {}
 function enumIndexer:GetEnums()
-	return table.clone(_enums) :: {[string]: CustomEnum}
+	return table.clone(_enums)
 end
-local enum = table.freeze(setmetatable({enumIndexer} :: typeof(enumIndexer), {
+local enum = table.freeze(setmetatable(enumIndexer :: typeof(enumIndexer), {
 	__index = _enums;
 }))
 EnumUtil.Enum = enum :: typeof(enum) & {[string]: CustomEnum}
@@ -166,7 +166,7 @@ type CustomEnumItem = typeof(EnumUtil.createEnumItem("", ""))
 	.GetEnumItems () -> ({CustomEnumItem})
 	[string] CustomEnumItem
 ]=]
-type CustomEnum = typeof(EnumUtil.createEnum("", {}))
+type CustomEnum = typeof(EnumUtil.createEnum("", {})) & {[string]: CustomEnumItem}
 
 
 return table.freeze(EnumUtil)
